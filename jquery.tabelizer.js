@@ -182,7 +182,12 @@
 				currentLevel = $row.data('level');
 			
 				//initially all rows other than the first level are hidden
-				var rowClass = 'l' + currentLevel + ' contracted ' + (currentLevel > 1 ? ' hidden' : '');
+				//unless firstRowExpanded is set to true
+				if (self.conf.firstRowExpanded == true) {
+					var rowClass = 'l' + currentLevel + ' contracted ' + (currentLevel > 2 ? ' hidden' : '');
+				}else {
+					var rowClass = 'l' + currentLevel + ' contracted ' + (currentLevel > 1 ? ' hidden' : '');
+				}
 				
 				//keep track of the highest level, this is used for the grouping lines
 				if (currentLevel > self.maxLevel)
@@ -211,6 +216,13 @@
 					$row.find('.expander').on('click', self.conf.onRowClick);
 				prevLevel = currentLevel;
 				$prevRow= $row;
+
+				//expand first row by default when page loads as a configuration option
+				if(self.conf.firstRowExpanded == true) {
+					if ($row.attr('data-level') == '1') {
+						$row.removeClass('contracted').addClass('expanded');
+					}
+				}
 			}
 		});
 		
@@ -236,13 +248,15 @@
 		fullRowClickable : true,//must be set before init
 		onBeforeRowClick : null,
 		onAfterRowClick : null,
-		onReady : null
+		onReady : null,
+		firstRowExpanded : false,
+		repeatedlyTabelize : false
 	};
 	
 	$.fn.tabelize = function(confProp){
 		
 		var existingSelf = this.data('tabelizer');
-		if (typeof existingSelf == 'undefined'){
+		if (typeof existingSelf == 'undefined' || self.conf.repeatedlyTabelize == true){
 			$.extend(self.conf, confProp);
 			self.caller = this;
 			self.init();
